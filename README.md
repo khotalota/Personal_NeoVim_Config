@@ -5,6 +5,6 @@ Will provide you with a starting Ground.
 
 Don't forget to run this command after clonning this repo
 
-    **':PlugInstall'**
+  **':PlugInstall'**
 
 And ALL SET!
