@@ -1,4 +1,5 @@
 " Basic Settings
+set nohlsearch
 set number
 " set relativenumber
 set autoindent
@@ -92,6 +93,49 @@ nnoremap <A-j> :m .+1<CR>==
 nnoremap <A-k> :m .-2<CR>==
 xnoremap <A-j> :m '>+1<CR>gv=gv
 xnoremap <A-k> :m '<-2<CR>gv=gv
+
+
+"" Commenting for C, C++, Java, Go, Rust
+"nnoremap <leader>c :s/^/\/\/ /<CR>
+"vnoremap <leader>c :s/^/\/\/ /<CR>
+"
+"" Uncommenting for C, C++, Java, Go, Rust
+"nnoremap <leader>u :s/^\/\/ //<CR>
+"vnoremap <leader>u :s/^\/\/ //<CR>
+"
+"" Commenting for Python, Julia
+"nnoremap <leader>p :s/^/# /<CR>
+"vnoremap <leader>p :s/^/# /<CR>
+"
+"" Uncommenting for Python, Julia
+"nnoremap <leader>o :s/^# //<CR>
+"vnoremap <leader>o :s/^# //<CR>
+"
+
+
+function! ToggleComment()
+  " Check if the current line starts with a comment (// or #)
+  if getline('.') =~ '^\s*\/\/'  " For C, C++, Java, Go, Rust
+    s/^\s*\/\// /
+  elseif getline('.') =~ '^\s*#'  " For Python, Julia
+    s/^\s*#// 
+  else
+    " Add comment based on filetype
+    if &filetype == 'c' || &filetype == 'cpp' || &filetype == 'java' || &filetype == 'go' || &filetype == 'rust'
+      s/^/\/\/ /
+    elseif &filetype == 'python' || &filetype == 'julia'
+      s/^/# /
+    endif
+  endif
+endfunction
+
+" Toggle commenting for current line
+nnoremap <C-/> :call ToggleComment()<CR>
+
+" Toggle commenting for visual selection
+vnoremap <C-/> :call ToggleComment()<CR>
+
+
 
 
 " Plugin configurations
