@@ -23,12 +23,15 @@ Plug 'tpope/vim-fugitive'       " Git integration into vim
 Plug 'airblade/vim-gitgutter'   " Shows git diffs in the sign columns
 
 Plug 'nvim-lua/plenary.nvim'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 Plug 'nvim-telescope/telescope.nvim'
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make'}
 Plug 'kyazdani42/nvim-tree.lua'
 
 Plug 'scrooloose/nerdtree'                  " File navigator
 
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate'}
 Plug 'lukas-reineke/indent-blankline.nvim'
 
 Plug 'neovim/nvim-lspconfig'
@@ -56,10 +59,11 @@ Plug 'numToStr/Comment.nvim'
 Plug 'lervag/vimtex'
 call plug#end()
 
+"=======================Lualine_config==================="
 lua << EOF
 -- Existing Lua configuration
 -- require('lualine_config')
-local lualine_config_path = vim.fn.stdpath('config') .. '/lualine_config.lua'
+local lualine_config_path = vim.fn.stdpath('config') .. '/lua/lualine_config.lua'
 if vim.fn.filereadable(lualine_config_path) == 1 then
     dofile(lualine_config_path)
 else
@@ -67,14 +71,55 @@ else
 end
 EOF
 
+"=======================Rust_LSP==========================="
 lua << EOF
-local rust_lsp_config_path = vim.fn.stdpath('config') .. '/rust_lsp_config.lua'
+local rust_lsp_config_path = vim.fn.stdpath('config') .. '/lua/rust_lsp_config.lua'
 if vim.fn.filereadable(rust_lsp_config_path) == 1 then
     dofile(rust_lsp_config_path)
 else
     print("Warning: rust_lsp_config.lua not found at " .. rust_lsp_config_path)
 end
 EOF
+
+"======================Telescope_config===================="
+lua << EOF
+local telescope_config_path = vim.fn.stdpath('config') .. '/lua/telescope_config.lua'
+if vim.fn.filereadable(telescope_config_path) == 1 then
+    dofile(telescope_config_path)
+else
+    print("Warning: telescope_config.lua not found at " .. telescope_config_path)
+end
+
+local fzf_config_path = vim.fn.stdpath('config') .. '/lua/fzf_config.lua'
+if vim.fn.filereadable(fzf_config_path) == 1 then
+    dofile(fzf_config_path)
+else
+    print("Warning: fzf_config.lua not found at " .. fzf_config_path)
+end
+EOF
+
+"=======================Home_find==========================="
+lua << EOF
+function _G.telescope_find_files_in_home()
+  local home = os.getenv("HOME")
+  require('telescope.builtin').find_files({
+    prompt_title = "Find Files in Home",
+    cwd = home,
+    hidden = true,
+    file_ignore_patterns = {
+      "%.cache/.*",
+      "%.local/.*",
+      "%.npm/.*",
+      "%.config/.*",
+      "node_modules/.*",
+      ".git/.*",
+    }
+  })
+end
+EOF
+"============================================================"
+
+command! FindInHome lua telescope_find_files_in_home()
 
 set background=dark
 colorscheme peachpuff
@@ -88,12 +133,14 @@ let g:vimtex_quickfix_open_on_warning = 0
 let g:vimtex_complete_enabled = 1
 let g:vimtex_echo_target_width = 80
 let g:vimtex_compiler_latexmk = {'options': '-pdf', 'build_dir': 'build'}
+
 nnoremap <leader>cv :VimtexCompile\|VimtexView<CR>
 
+nnoremap <leader>fh :FindInHome<CR>
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+"nnoremap <leader>fh <cmd>Telescope help_tags<cr>
 nnoremap <C-t> :NERDTreeToggle<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
