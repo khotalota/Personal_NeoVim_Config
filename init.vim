@@ -1,7 +1,6 @@
-" Basic Settings
 set nohlsearch
 set number
-" set relativenumber
+set relativenumber
 set autoindent
 set expandtab
 set tabstop=4
@@ -19,24 +18,19 @@ set shortmess+=c
 set signcolumn=yes
 set termguicolors
 
-"""""""""""""""""""""""""""""" Plugins """"""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.local/share/nvim/plugged')
-" Git integration
 Plug 'tpope/vim-fugitive'       " Git integration into vim 
 Plug 'airblade/vim-gitgutter'   " Shows git diffs in the sign columns
 
-" File navigation and project management
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'kyazdani42/nvim-tree.lua'
 
 Plug 'scrooloose/nerdtree'                  " File navigator
 
-" Syntax highlighting and indentation
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'lukas-reineke/indent-blankline.nvim'
 
-" Autocompletion and LSP
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
@@ -45,38 +39,57 @@ Plug 'hrsh7th/cmp-path'
 Plug 'L3MON4D3/LuaSnip'
 Plug 'saadparwaiz1/cmp_luasnip'
 
-" Code formatting
 Plug 'sbdchd/neoformat'
 
-" UI enhancements
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'akinsho/bufferline.nvim'
 
-" Color schemes
-" Plug 'sainnhe/gruvbox-material'
-
-" Writing aids
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 
-" Markdown support
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install' }
 
-" Other utilities
 Plug 'tpope/vim-surround'
 Plug 'windwp/nvim-autopairs'
 Plug 'numToStr/Comment.nvim'
+Plug 'lervag/vimtex'
 call plug#end()
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+lua << EOF
+-- Existing Lua configuration
+-- require('lualine_config')
+local lualine_config_path = vim.fn.stdpath('config') .. '/lualine_config.lua'
+if vim.fn.filereadable(lualine_config_path) == 1 then
+    dofile(lualine_config_path)
+else
+    print("Warning: rust_lsp_config.lua not found at " .. lualine_config_path)
+end
+EOF
 
-" Color scheme
+lua << EOF
+local rust_lsp_config_path = vim.fn.stdpath('config') .. '/rust_lsp_config.lua'
+if vim.fn.filereadable(rust_lsp_config_path) == 1 then
+    dofile(rust_lsp_config_path)
+else
+    print("Warning: rust_lsp_config.lua not found at " .. rust_lsp_config_path)
+end
+EOF
+
 set background=dark
 colorscheme peachpuff
 
-" Key mappings
 let mapleader = " "
+
+let g:vimtex_compiler_method = 'latexmk'
+let g:vimtex_compiler_progname = 'nvr'
+let g:vimtex_view_method = 'zathura'
+let g:vimtex_quickfix_open_on_warning = 0
+let g:vimtex_complete_enabled = 1
+let g:vimtex_echo_target_width = 80
+let g:vimtex_compiler_latexmk = {'options': '-pdf', 'build_dir': 'build'}
+nnoremap <leader>cv :VimtexCompile\|VimtexView<CR>
+
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
@@ -94,33 +107,12 @@ nnoremap <A-k> :m .-2<CR>==
 xnoremap <A-j> :m '>+1<CR>gv=gv
 xnoremap <A-k> :m '<-2<CR>gv=gv
 
-
-"" Commenting for C, C++, Java, Go, Rust
-"nnoremap <leader>c :s/^/\/\/ /<CR>
-"vnoremap <leader>c :s/^/\/\/ /<CR>
-"
-"" Uncommenting for C, C++, Java, Go, Rust
-"nnoremap <leader>u :s/^\/\/ //<CR>
-"vnoremap <leader>u :s/^\/\/ //<CR>
-"
-"" Commenting for Python, Julia
-"nnoremap <leader>p :s/^/# /<CR>
-"vnoremap <leader>p :s/^/# /<CR>
-"
-"" Uncommenting for Python, Julia
-"nnoremap <leader>o :s/^# //<CR>
-"vnoremap <leader>o :s/^# //<CR>
-"
-
-
 function! ToggleComment()
-  " Check if the current line starts with a comment (// or #)
   if getline('.') =~ '^\s*\/\/'  " For C, C++, Java, Go, Rust
     s/^\s*\/\// /
   elseif getline('.') =~ '^\s*#'  " For Python, Julia
     s/^\s*#// 
   else
-    " Add comment based on filetype
     if &filetype == 'c' || &filetype == 'cpp' || &filetype == 'java' || &filetype == 'go' || &filetype == 'rust'
       s/^/\/\/ /
     elseif &filetype == 'python' || &filetype == 'julia'
@@ -129,19 +121,18 @@ function! ToggleComment()
   endif
 endfunction
 
-" Toggle commenting for current line
 nnoremap <C-/> :call ToggleComment()<CR>
 
-" Toggle commenting for visual selection
 vnoremap <C-/> :call ToggleComment()<CR>
 
 
 
-
-" Plugin configurations
 lua << EOF
 require('nvim-treesitter.configs').setup {
-  ensure_installed = {"python", "cpp", "lua", "vim", "javascript", "typescript", "html", "css"},
+  ensure_installed = {
+    "c", "cpp", "python", "java", "rust", "julia", "lua", "vim",
+    "javascript", "typescript", "html", "css"
+  },
   highlight = {
     enable = true,
   },
@@ -172,7 +163,16 @@ end
 
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-local servers = { 'pyright', 'tsserver', 'clangd' }
+local servers = {
+    'clangd',
+    'jdtls',
+    'pyright',
+    'julials',
+    'rust_analyzer',
+    'ts_ls',
+    'html',
+    'cssls',
+    }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,
@@ -203,11 +203,9 @@ cmp.setup({
 })
 EOF
 
-" Goyo (distraction-free writing) settings
 autocmd! User GoyoEnter Limelight
 autocmd! User GoyoLeave Limelight!
 
-" Neoformat settings
 augroup fmt
   autocmd!
   autocmd BufWritePre * undojoin | Neoformat
