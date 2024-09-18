@@ -1,22 +1,4 @@
-set nohlsearch
-set number
-set relativenumber
-set autoindent
-set expandtab
-set tabstop=4
-set shiftwidth=4
-set smarttab
-set softtabstop=4
-set mouse=a
-set clipboard+=unnamedplus
-set hidden
-set nobackup
-set nowritebackup
-set cmdheight=2
-set updatetime=300
-set shortmess+=c
-set signcolumn=yes
-set termguicolors
+lua require('standard_config')
 
 call plug#begin('~/.local/share/nvim/plugged')
 Plug 'tpope/vim-fugitive'       " Git integration into vim 
@@ -26,7 +8,15 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make'}
+"Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make'}
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+Plug 'akinsho/toggleterm.nvim'
+Plug 'nvim-lua/lsp-status.nvim'
+Plug 'andymass/vim-matchup'
+Plug 'kevinhwang91/promise-async'
+Plug 'kevinhwang91/nvim-ufo'
+Plug 'ggandor/leap.nvim'
+
 Plug 'kyazdani42/nvim-tree.lua'
 
 Plug 'scrooloose/nerdtree'                  " File navigator
@@ -98,6 +88,37 @@ else
 end
 EOF
 
+"=======================Toggleterm=========================="
+lua << EOF
+local toggleterm_config_path = vim.fn.stdpath('config') .. '/lua/toggleterm_config.lua'
+if vim.fn.filereadable(toggleterm_config_path) == 1 then
+    dofile(toggleterm_config_path)
+else
+    print("Warning: toggleterm_config.lua not found at " .. toggleterm_config_path)
+end
+EOF
+
+"=======================LSP-Status=========================="
+lua << EOF
+local lsp_status_config_path = vim.fn.stdpath('config') .. '/lua/lsp_status_config.lua'
+if vim.fn.filereadable(lsp_status_config_path) == 1 then
+    dofile(lsp_status_config_path)
+else
+    print("Warning: lsp_status_config.lua not found at " .. lsp_status_config_path)
+end
+EOF
+
+"======================Leap-navigation========================="
+lua << EOF
+local leap_navigation_config_path = vim.fn.stdpath('config') .. '/lua/leap_navigation_config.lua'
+if vim.fn.filereadable(leap_navigation_config_path) == 1 then
+    dofile(leap_navigation_config_path)
+else
+    print("Warning: leap_navigation_config.lua not found at " .. leap_navigation_config_path)
+end
+EOF
+
+
 "=======================Home_find==========================="
 lua << EOF
 function _G.telescope_find_files_in_home()
@@ -134,7 +155,7 @@ let g:vimtex_complete_enabled = 1
 let g:vimtex_echo_target_width = 80
 let g:vimtex_compiler_latexmk = {'options': '-pdf', 'build_dir': 'build'}
 
-nnoremap <leader>cv :VimtexCompile\|VimtexView<CR>
+" nnoremap <leader>cv :VimtexCompile\|VimtexView<CR>
 
 nnoremap <leader>fh :FindInHome<CR>
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
@@ -249,6 +270,7 @@ cmp.setup({
   })
 })
 EOF
+
 
 autocmd! User GoyoEnter Limelight
 autocmd! User GoyoLeave Limelight!
