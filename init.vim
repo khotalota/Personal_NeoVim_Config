@@ -1,8 +1,10 @@
 lua require('standard_config')
 
 call plug#begin('~/.local/share/nvim/plugged')
-Plug 'tpope/vim-fugitive'       " Git integration into vim 
-Plug 'airblade/vim-gitgutter'   " Shows git diffs in the sign columns
+Plug 'tpope/vim-fugitive', { 'on': 'G'}       " Git integration into vim 
+Plug 'airblade/vim-gitgutter', { 'on': 'GitGutterToggle'}   " Shows git diffs in the sign columns
+
+Plug 'mfussenegger/nvim-jdtls'
 
 Plug 'nvim-lua/plenary.nvim'
 Plug 'junegunn/fzf'
@@ -17,9 +19,8 @@ Plug 'kevinhwang91/promise-async'
 Plug 'kevinhwang91/nvim-ufo'
 Plug 'ggandor/leap.nvim'
 
-Plug 'kyazdani42/nvim-tree.lua'
-
-Plug 'scrooloose/nerdtree'                  " File navigator
+Plug 'nvim-tree/nvim-tree.lua'
+Plug 'nvim-tree/nvim-web-devicons'
 
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate'}
 Plug 'lukas-reineke/indent-blankline.nvim'
@@ -118,6 +119,36 @@ else
 end
 EOF
 
+"=======================Nvim-tree==========================="
+lua << EOF
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
+
+-- empty setup using defaults
+require("nvim-tree").setup()
+
+-- OR setup with some options
+require("nvim-tree").setup({
+  sort_by = "case_sensitive",
+  view = {
+    width = 30,
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
+-- Keymaps for nvim-tree
+vim.api.nvim_set_keymap('n', '<C-n>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>nf', ':NvimTreeFindFile<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>nr', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
+EOF
 
 "=======================Home_find==========================="
 lua << EOF
@@ -143,7 +174,7 @@ EOF
 command! FindInHome lua telescope_find_files_in_home()
 
 set background=dark
-colorscheme peachpuff
+colorscheme slate
 
 let mapleader = " "
 
@@ -162,7 +193,7 @@ nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 "nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-nnoremap <C-t> :NERDTreeToggle<CR>
+"nnoremap <C-t> :NvimTreeToggle<CR>
 nnoremap <leader>w :w<CR>
 nnoremap <leader>q :q<CR>
 
@@ -278,4 +309,9 @@ autocmd! User GoyoLeave Limelight!
 augroup fmt
   autocmd!
   autocmd BufWritePre * undojoin | Neoformat
+augroup END
+
+augroup jdtls_lsp
+    autocmd!
+    autocmd FileType java lua require('java_lsp_config')
 augroup END
