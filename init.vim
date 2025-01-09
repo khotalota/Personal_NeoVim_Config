@@ -1,4 +1,5 @@
 lua require('standard_config')
+" lua require('elixir-lsp')
 
 call plug#begin('~/.local/share/nvim/plugged')
 Plug 'tpope/vim-fugitive', { 'on': 'G'}       " Git integration into vim 
@@ -48,6 +49,13 @@ Plug 'tpope/vim-surround'
 Plug 'windwp/nvim-autopairs'
 Plug 'numToStr/Comment.nvim'
 Plug 'lervag/vimtex'
+
+Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'jay-babu/mason-null-ls.nvim'
+Plug 'jay-babu/mason-nvim-dap.nvim'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'mfussenegger/nvim-dap'
 call plug#end()
 
 "=======================Lualine_config==================="
@@ -169,7 +177,28 @@ function _G.telescope_find_files_in_home()
   })
 end
 EOF
-"============================================================"
+
+"========================Elixir===================================="
+lua << EOF
+local elixir_lsp_config_path = vim.fn.stdpath('config') .. '/lua/elixir_lsp.lua'
+if vim.fn.filereadable(elixir_lsp_config_path) == 1 then
+    dofile(elixir_lsp_config_path)
+else
+    print("Warning: elixir_lsp.lua not found at " .. elixir_lsp_config_path)
+end
+EOF
+
+"=========================Mason======================================"
+lua << EOF
+local mason_config_path = vim.fn.stdpath('config') .. '/lua/mason_config.lua'
+if vim.fn.filereadable(mason_config_path) == 1 then
+    dofile(mason_config_path)
+else
+    print("Warning: mason_config.lua not found at " .. mason_config_path)
+end
+EOF
+
+"===================================================================="
 
 command! FindInHome lua telescope_find_files_in_home()
 
@@ -230,7 +259,8 @@ lua << EOF
 require('nvim-treesitter.configs').setup {
   ensure_installed = {
     "c", "cpp", "python", "java", "rust", "julia", "lua", "vim",
-    "javascript", "typescript", "html", "css"
+    "javascript", "typescript", "html", "css",
+    "elixir", "heex","eex"
   },
   highlight = {
     enable = true,
@@ -271,6 +301,7 @@ local servers = {
     'ts_ls',
     'html',
     'cssls',
+    --'elixirls',
     }
 for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
@@ -315,3 +346,8 @@ augroup jdtls_lsp
     autocmd!
     autocmd FileType java lua require('java_lsp_config')
 augroup END
+
+"augroup elixir_lsp
+"    autocmd!
+"    autocmd FileType elixir lua require('elixir_lsp')
+"augroup END
